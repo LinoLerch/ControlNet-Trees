@@ -71,3 +71,56 @@ def run_skeleton_pipeline(ROOT_DIR_GIS, input_path, save_steps=False):
     imsave(output_path_skel, img_as_ubyte(skeleton), check_contrast=False)
 
     return f'Image {img_nr} processed and results saved'
+
+def get_files_folder(path):
+    image_list = []
+    for filename in glob.glob(os.path.join(path,'*')):
+        im=filename #Image.open(filename)
+        image_list.append(im)
+    return image_list
+
+def append_img_to_dataset(img_path, img_nr, output_folder):
+    # Open the image
+    input = Image.open(img_path)
+    
+    # Removing the background
+    rembg_img = remove(input)
+
+    # Binarize
+    binary_img = binarize_transparent(rembg_img)
+
+    # Opening and closing
+    opening, closing = opening_closing(binary_img)
+
+    # Skeletonize
+    skeleton = skeletonize(closing)
+    
+    # Save both the original image and the skeletonized image
+    output_path = os.path.join(output_folder, "images", f'{img_nr}.png')
+    output_path_skel = os.path.join(output_folder, "conditioning_images", f'{img_nr}.png')
+    input.save(output_path)
+    imsave(output_path_skel, img_as_ubyte(skeleton), check_contrast=False)
+
+def build_dataset(input_folder, output_folder):
+    output_folder_images = os.path.join(output_folder, "images")
+    # Create output folder if it does not exist
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+    if not os.path.exists(output_folder_images):
+        os.makedirs(output_folder_images)
+        os.makedirs(os.path.join(output_folder, "conditioning_images"))
+    
+    # Get all the images in the input folder
+    image_list = get_files_folder(input_folder)
+
+    next_img_nr = len(os.listdir(output_folder_images))
+    
+    # Run the skeleton pipeline for each image
+    for img_path in image_list:
+        try:
+            append_img_to_dataset(img_path, next_img_nr, output_folder)
+            next_img_nr += 1
+        except Exception as error:
+            print(f'An error occurred in image {img_path}: {error}')
+    
+    return f'Dataset expanded to {next_img_nr} images'
