@@ -98,19 +98,21 @@ def build_dataset_using_segmentation_labels(input_folder, segmentation_folder, D
     for img_path in image_list:
         try:
             # Open the image and the segmentation label	
-            input = Image.open(img_path)
-            filename = os.path.basename(img_path)
-            img = cv2.imread(os.path.join(segmentation_folder, filename), cv2.IMREAD_GRAYSCALE)
-            thresh = 1
-            im_bw = cv2.threshold(img, thresh, 255, cv2.THRESH_BINARY)[1]
-            segmentation = Image.open()
+            input = cv2.imread(img_path)
+            input = image_resize(input, 512)
+            # Get filename and change extension to .png
+            filename = os.path.basename(img_path).split(".")[-2] + ".png"
+            segmentation = cv2.imread(os.path.join(segmentation_folder, filename), cv2.IMREAD_GRAYSCALE)
+            segmentation = image_resize(segmentation, 512)
+            # thresh = 1
+            # im_bw = cv2.threshold(img, thresh, 255, cv2.THRESH_BINARY)[1]
 
             skeleton = skeletonize(segmentation)
             
             # Save both the original image and the skeletonized image
             output_path = os.path.join(DATASET_DIR, "images", f'{next_img_nr}.png')
             output_path_skel = os.path.join(DATASET_DIR, "conditioning_images", f'{next_img_nr}.png')
-            input.save(output_path)
+            cv2.imwrite(output_path, input)
             imsave(output_path_skel, img_as_ubyte(skeleton), check_contrast=False)
 
             next_img_nr += 1
@@ -160,3 +162,22 @@ def generate_img_captions(DATASET_DIR):
     with open(os.path.join(DATASET_DIR,"train.jsonl"), 'w') as f:
         for item in caption_list:
             f.write(json.dumps(item) + "\n")
+
+
+def image_resize(image, sidelength, inter = cv2.INTER_AREA):
+    """
+    Resize an image to size sidelength for the smaller side while maintaining the aspect ratio.
+    """
+    (h, w) = image.shape[:2]
+
+    if h > w:
+        width = sidelength
+        height = int(h * (width / w))
+    else:
+        height = sidelength
+        width = int(w * (height / h))
+
+    dim = (width, height)
+    
+    # resize the image
+    return cv2.resize(image, dim, interpolation = inter)
