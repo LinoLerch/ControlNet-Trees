@@ -101,7 +101,7 @@ def build_dataset_using_segmentation_labels(input_folder, segmentation_folder, D
             input = cv2.imread(img_path)
             input = image_resize(input, 512)
             # Get filename and change extension to .png
-            filename = os.path.basename(img_path).split(".")[-2] + ".png"
+            filename = os.path.basename(img_path).replace(".jpg", ".png")
             segmentation = cv2.imread(os.path.join(segmentation_folder, filename), cv2.IMREAD_GRAYSCALE)
             segmentation = image_resize(segmentation, 512)
             # thresh = 1
