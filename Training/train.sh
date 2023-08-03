@@ -7,12 +7,12 @@ accelerate launch train_controlnet.py --mixed_precision="fp16" \
  --train_data_dir="/mnt/hdd/linol/treedataset" \
  --resolution=512 \
  --learning_rate=1e-5 \
- --validation_image "./val_image_1.png" "./val_image_2.png" \
- --validation_prompt "a lone tree in the middle of a field" "a large tree with a blue sky." \
+ --validation_image "./val_image_1.png" "./val_image_2.png" "./val_image_3.png" "./val_image_4.png" \
+ --validation_prompt "a lone tree in the middle of a field" "detailed high-quality professional image" "a large tree with a blue sky" "a tree in a field" \
  --train_batch_size=1 \
  --gradient_accumulation_steps=4 \
  --mixed_precision="fp16" \
- --num_train_epochs=3 \
+ --num_train_epochs=6 \
  --tracker_project_name="controlnet_trees" \
  --checkpointing_steps=5000 \
- --validation_steps=5000
+ --validation_steps=2500
