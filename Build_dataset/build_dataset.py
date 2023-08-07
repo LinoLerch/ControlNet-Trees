@@ -24,7 +24,7 @@ def append_img_to_dataset(img, img_nr, output_folder):
     # Save both the original image and the skeletonized image
     output_path = os.path.join(output_folder, "images", f'{img_nr}.png')
     output_path_skel = os.path.join(output_folder, "conditioning_images", f'{img_nr}.png')
-    input.save(output_path)
+    img.save(output_path)
     imsave(output_path_skel, img_as_ubyte(skeleton), check_contrast=False)
 
 
@@ -163,11 +163,15 @@ def generate_img_captions(DATASET_DIR):
             f.write(json.dumps(item) + "\n")
 
 
-def image_resize(image, sidelength, inter = cv2.INTER_AREA):
+def image_resize(image, sidelength):
     """
-    Resize an image to size sidelength for the smaller side while maintaining the aspect ratio.
+    Resize an PIL-image to size sidelength for the smaller side while maintaining the aspect ratio.
+    If the image is already smaller than sidelength, it is not resized.
     """
-    (h, w) = image.shape[:2]
+    (w, h) = image.size
+
+    if min(w, h) < sidelength:
+        return image
 
     if h > w:
         width = sidelength
@@ -179,4 +183,4 @@ def image_resize(image, sidelength, inter = cv2.INTER_AREA):
     dim = (width, height)
     
     # resize the image
-    return cv2.resize(image, dim, interpolation = inter)
+    return image.resize(dim, resample=Image.NEAREST)
