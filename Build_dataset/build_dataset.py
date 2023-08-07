@@ -17,10 +17,9 @@ def get_files_folder(path):
     return [file for file in glob.glob(os.path.join(path,'*'))]
     
 
-def append_img_to_dataset(img_path, img_nr, output_folder):
-    # Open the image
-    input = Image.open(img_path)
-    skeleton = skeleton_pipeline(input)
+def append_img_to_dataset(img, img_nr, output_folder):
+    # Skeletonize the image
+    skeleton = skeleton_pipeline(img)
     
     # Save both the original image and the skeletonized image
     output_path = os.path.join(output_folder, "images", f'{img_nr}.png')
@@ -70,7 +69,7 @@ def build_dataset_from_folder(input_folder, DATASET_DIR):
         # Run the skeleton pipeline for each image
         for img_path in image_list:
             try:
-                append_img_to_dataset(img_path, next_img_nr, DATASET_DIR)
+                append_img_to_dataset(Image.open(img_path), next_img_nr, DATASET_DIR)
                 next_img_nr += 1
             except Exception as error:
                 print(f'An error occurred in image {img_path}: {error}')
