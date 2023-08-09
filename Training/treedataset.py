@@ -39,10 +39,8 @@ class TreeDataset(datasets.GeneratorBasedBuilder):
         )
 
     def _split_generators(self, dl_manager):
-        ROOT_DIR = os.path.abspath('')
+        ROOT_DIR = "/mnt/hdd/user/treedataset" # Specify the path to the dataset here
         metadata_path = os.path.join(ROOT_DIR, "train.jsonl")
-        images_dir = os.path.join(ROOT_DIR, "images")
-        conditioning_images_dir = os.path.join(ROOT_DIR, "conditioning_images")
 
         return [
             datasets.SplitGenerator(
@@ -50,25 +48,24 @@ class TreeDataset(datasets.GeneratorBasedBuilder):
                 # These kwargs will be passed to _generate_examples
                 gen_kwargs={
                     "metadata_path": metadata_path,
-                    "images_dir": images_dir,
-                    "conditioning_images_dir": conditioning_images_dir,
+                    "root_dir": ROOT_DIR,
                 },
             ),
         ]
 
-    def _generate_examples(self, metadata_path, images_dir, conditioning_images_dir):
+    def _generate_examples(self, metadata_path, root_dir):
         metadata = pd.read_json(metadata_path, lines=True)
 
         for _, row in metadata.iterrows():
             text = row["text"]
 
             image_path = row["image"]
-            image_path = os.path.join(images_dir, image_path)
+            image_path = os.path.join(root_dir, image_path)
             image = open(image_path, "rb").read()
 
             conditioning_image_path = row["conditioning_image"]
             conditioning_image_path = os.path.join(
-                conditioning_images_dir, row["conditioning_image"]
+                root_dir, row["conditioning_image"]
             )
             conditioning_image = open(conditioning_image_path, "rb").read()
 
